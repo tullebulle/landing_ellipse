@@ -1,0 +1,101 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+
+\author{Ulrik Unneberg}
+
+\begin{document}
+\title{Landing an ellipse}
+\maketitle
+
+\section*{Problem Setup}
+
+Consider an ellipse with semi-major axis \( a = 1.0 \) and semi-minor axis \( b = 0.5 \), density \( \rho_s = 1.2 \), and moment of inertia \( I = 1.0 \). The surrounding fluid has density \( \rho_f = 1.0 \) and gravity \( g = 9.81, \ \text{m/s}^2 \). Derived non-dimensional parameters are as follows:
+
+\[
+\beta = \frac{b}{a}, \quad \rho_* = \frac{\rho_s}{\rho_f}
+\]
+
+Forces and torque parameters are given by
+\begin{itemize}
+    \item Constants: \( A = 1.4 \), \( B = 1.0 \)
+    \item Viscous terms: \( \mu = 0.2 \), \( \nu = 0.2 \)
+    \item Torque constants: \( C_T = 1.2 \), \( C_R = \pi \)
+\end{itemize}
+
+The system is simulated with a time step \( \Delta t = 0.01 \) and total time \( T = 5 \).
+
+\section*{Dynamics Equations}
+
+Define the translational velocities \( u \) and \( v \), the angular velocity \( w \), and orientation \( \theta \). The forces \( F_u \), \( F_v \) and moment \( M \) are computed as:
+
+\[
+F = \frac{1}{\pi} \left( A - B \frac{u^2 - v^2}{u^2 + v^2 + \epsilon} \right) \sqrt{u^2 + v^2 + \epsilon}
+\]
+
+\[
+M = 0.2 (\mu + \nu |w|) w
+\]
+\[
+\Gamma = \frac{2}{\pi} \left( C_R w - C_T \frac{u v}{\sqrt{u^2 + v^2 + \epsilon}} \right)
+\]
+
+where \( \epsilon \) is a small constant to avoid division by zero.
+
+\section*{Equations of Motion}
+
+The equations of motion governing \( u \), \( v \), and \( w \) are given by:
+
+\[
+\dot{u} = \frac{(I + \beta^2) v w - \Gamma v - \sin \theta - Fu}{I + \beta^2}
+\]
+\[
+\dot{v} = \frac{-(I + 1) u w + \Gamma u - \cos \theta - Fv}{I + 1}
+\]
+\[
+\dot{w} = \frac{-(1 - \beta^2) u v - M}{0.25 \left( I (1 + \beta^2) + 0.5 (1 - \beta^2)^2 \right)}
+\]
+
+The position \( (x, y) \) and orientation \( \theta \) are updated as follows:
+
+\[
+x \leftarrow x + (u \cos \theta - v \sin \theta) \Delta t
+\]
+\[
+y \leftarrow y + (u \sin \theta + v \cos \theta) \Delta t
+\]
+\[
+\theta \leftarrow \theta + w \Delta t
+\]
+
+\section{Reinforcement Learning}
+Our objective is the following 
+\begin{itemize}
+    \item $theta_G = \pi/4$
+    \item $x_G = 100$
+    \item $y_G = -50$
+\end{itemize}
+We want to model the torque action is constant control torque
+$$
+\tau_t = \tanh(a_t) \in \{-1, 1\}.
+$$
+
+
+
+\section*{Numerical Simulation}
+
+The system is numerically simulated over a fixed time period with a time step of \( \Delta t = 0.01 \). Initial conditions are:
+\[
+x = 0, \quad y = 0, \quad \theta = \frac{\pi}{4}, \quad u = 0, \quad v = 0, \quad w = 0
+\]
+
+\section*{Results}
+
+The trajectory of the ellipse can be visualized by plotting \( x \) vs \( y \), showing the dynamics influenced by the forces and torques as described.
+
+
+
+
+\end{document}
