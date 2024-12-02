@@ -7,6 +7,7 @@ import argparse
 import numpy as np
 import pdb; 
 from utils import store_trajectory, get_best_reward
+import multiprocessing
 
 
 
@@ -20,7 +21,7 @@ def run_ellipselanding():
     parser.add_argument(
         '--maxGenerations',
         help='Maximum Number of generations to run',
-        default=5,
+        default=10,
         type=int,
         required=False)    
     parser.add_argument(
@@ -38,7 +39,7 @@ def run_ellipselanding():
     parser.add_argument(
         '--concurrentWorkers',
         help='Number of concurrent workers / environments',
-        default=11,
+        default=multiprocessing.cpu_count(),
         type=int,
         required=False)
 
@@ -140,16 +141,24 @@ def run_ellipselanding():
     return e
 
 
-
-
-best_indx, best_return = get_best_reward()
-for _ in range(10):
+def eval_run():
+    # id = multiprocessing.current_process().pid
     e = run_ellipselanding()
+    best_indx, best_return = get_best_reward()
     best_reward_run = e["Solver"]["Training"]['Best Return'][0]
     if best_reward_run > best_return:
-        print("previous best", best_return, "new best", best_reward_run)
-        print(f"----------NEW BEST REWARD {round(best_reward_run, 2)}, beating the previous best {round(best_return, 2)}. ADDED TO TRAJECTORIES!----------")
         store_trajectory()
+
+
+if __name__ == "__main__":
+
+    num_processes = 2 #multiprocessing.cpu_count()
+    # print(num_processes)
     
 
+    for _ in range(num_processes):
+        eval_run()
 
+    best_indx, best_return = get_best_reward()
+    print("DONE RUNNING EXPERIMENTS")
+    print("Best Reward = ", best_return)
